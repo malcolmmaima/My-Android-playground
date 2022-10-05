@@ -17,6 +17,7 @@ package com.malcolmmaima.android.playground.di
 
 import com.malcolmmaima.android.playground.data.repository.WeatherRepository
 import com.malcolmmaima.android.playground.data.repository.WeatherRepositoryImpl
+import com.malcolmmaima.android.playground.ui.viewmodel.DSAViewModel
 import com.malcolmmaima.android.playground.ui.viewmodel.MainViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.module.Module
@@ -28,6 +29,7 @@ val repositoryModule: Module = module {
 
 val viewModelModule: Module = module {
     viewModel { MainViewModel(weatherRepository = get()) }
+    viewModel { DSAViewModel()}
 }
 
 val appModules: List<Module> = listOf(

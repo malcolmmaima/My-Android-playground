@@ -15,11 +15,14 @@
  */
 package com.malcolmmaima.android.playground.ui.fragments
 
+import android.app.AlertDialog
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.app.DialogCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -27,6 +30,7 @@ import com.malcolmmaima.android.playground.R
 import com.malcolmmaima.android.playground.databinding.FragmentFirstBinding
 import com.malcolmmaima.android.playground.ui.viewmodel.MainViewModel
 import com.google.android.material.snackbar.Snackbar
+import com.malcolmmaima.android.playground.ui.viewmodel.DSAViewModel
 import com.network.data.models.WeatherResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -40,10 +44,14 @@ class FirstFragment : Fragment() {
 
     private var _binding: FragmentFirstBinding? = null
     private val mainViewModel: MainViewModel by inject()
+    private val dsaViewModel: DSAViewModel by inject()
 
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
+
+    var names = mutableListOf<String>()
+    var numbers = mutableListOf<Int>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -51,14 +59,72 @@ class FirstFragment : Fragment() {
     ): View? {
 
         _binding = FragmentFirstBinding.inflate(inflater, container, false)
+
+        // initialize a list of n number names and pass to the DSA view model
+        generateNames()
         return binding.root
 
+    }
+
+    private fun generateNames(size: Int = 100) {
+        names.clear()
+        for (i in 1..size) {
+            names.add("Name $i")
+        }
+    }
+
+    private fun generateNumbers(size: Int = 100) {
+        numbers.clear()
+        for (i in 1..size) {
+            numbers.add(i)
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         fetchWeatherData()
         initObservers()
+        initListeners()
+    }
+
+    private fun initListeners() {
+        _binding?.buttonFirst?.setOnClickListener {
+            val alertDialogBuilder = AlertDialog.Builder(requireContext())
+            alertDialogBuilder.setTitle("Select Algorithm")
+            alertDialogBuilder.setItems(
+                arrayOf("Constant Time", "Linear Time", "Quadratic Time", "Other")
+            ) { _, which ->
+                when (which) {
+                    0 -> {
+                        // Constant Time
+                        generateNames()
+                        dsaViewModel.checkFirst(names)
+                        Log.d("FirstFragment", "Space complexity: ${dsaViewModel.calculateSpaceComplexity { dsaViewModel.checkFirst(names) }}")
+                    }
+                    1 -> {
+                        // Linear Time
+                        generateNames()
+                        dsaViewModel.printNames(names)
+                        Log.d("FirstFragment", "Space complexity: ${dsaViewModel.calculateSpaceComplexity { dsaViewModel.printNames(names) }}")
+                    }
+                    2 -> {
+                        // Quadratic Time
+                        generateNames(2)
+                        dsaViewModel.printNamesTwice(names)
+                        Log.d("FirstFragment", "Space complexity: ${dsaViewModel.calculateSpaceComplexity { dsaViewModel.printNamesTwice(names) }}")
+                    }
+
+                    3 -> {
+                        // Other
+                        generateNumbers()
+                        dsaViewModel.bubbleSort(numbers)
+                        Log.d("FirstFragment", "Space complexity: ${dsaViewModel.calculateSpaceComplexity { dsaViewModel.bubbleSort(numbers) }}")
+                    }
+                }
+            }
+            val alertDialog = alertDialogBuilder.create()
+            alertDialog.show()
+        }
     }
 
     private fun initObservers() {
